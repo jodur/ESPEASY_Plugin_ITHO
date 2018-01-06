@@ -3,13 +3,16 @@
 //#######################################################################################################
 
 // List of commands:
-// JOIN to join ESP8266 with Itho ventilation unit
-// LOW - set Itho ventilation unit to lowest speed
-// MEDIUM - set Itho ventilation unit to medium speed
-// HIGH - set Itho ventilation unit to max speed
-// TIMER1 - set itho to max speed with hardware timer (10 min)
-// TIMER2 - set itho to max speed with hardware timer (20 min)
-// TIMER3 - set itho to max speed with hardware timer (30 min)
+// 1111 to join ESP8266 with Itho ventilation unit
+// 9999 to leaveESP8266 with Itho ventilation unit
+// 0 to set Itho ventilation unit to standby
+// 1 - set Itho ventilation unit to low speed
+// 2 - set Itho ventilation unit to medium speed
+// 3 - set Itho ventilation unit to high speed
+// 3 - set Itho ventilation unit to full speed
+// 10 - set itho to max speed with hardware timer (10 min)
+// 20 - set itho to max speed with hardware timer (20 min)
+// 30 - set itho to max speed with hardware timer (30 min)
 
 //List of States:
 // 1 - set Itho ventilation unit to lowest speed
@@ -44,6 +47,7 @@ Ticker PLUGIN_145_ITHOticker;
 int PLUGIN_145_State=1; // after startup it is assumed that the fan is running low
 int PLUGIN_145_OldState=1;
 int PLUGIN_145_Timer=0;
+long PLUGIN_145_LastPublish=0; 
 
 #define PLUGIN_145
 #define PLUGIN_ID_145         145
@@ -119,22 +123,25 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
          PLUGIN_145_Timer=0;
        } 
       
+      //Publish new data when state is changed or timer is running
+      if  ((PLUGIN_145_OldState!=PLUGIN_145_State) || (PLUGIN_145_Timer>0))
+      {
+        PLUGIN_145_Publishdata(event);
+        sendData(event);
+      }  
+      //Remeber current state for next cycle
+      PLUGIN_145_OldState=PLUGIN_145_State;
+      break;
     }
+    
 
 
     case PLUGIN_READ: {    
-      
-              UserVar[event->BaseVarIndex]=PLUGIN_145_State;
-              UserVar[event->BaseVarIndex+1]=PLUGIN_145_Timer;
-              String log = F("State: ");
-              log += UserVar[event->BaseVarIndex];
-              addLog(LOG_LEVEL_INFO, log);
-              log = F("Timer: ");
-              log += UserVar[event->BaseVarIndex+1];
-              addLog(LOG_LEVEL_INFO, log);
-              
-              success = true;
-              break;
+         
+         // This ensures that even when Values are not changing, data is send at the configured interval for aquisition 
+         PLUGIN_145_Publishdata(event);
+         success = true;
+         break;
     }  
     
 		case PLUGIN_WRITE: {
@@ -144,10 +151,10 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 			String param1 = parseString(tmpString, 2);
 
 
-			if (cmd.equalsIgnoreCase(F("ITHOSEND")))
+			if (cmd.equalsIgnoreCase(F("STATE")))
 			{
 
-				if (param1.equalsIgnoreCase(F("join")))
+				if (param1.equalsIgnoreCase(F("1111")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoJoin);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'join' to Itho unit"));
@@ -155,7 +162,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}
 
-				if (param1.equalsIgnoreCase(F("leave")))
+				if (param1.equalsIgnoreCase(F("9999")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoLeave);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'leave' to Itho unit"));
@@ -163,7 +170,17 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}
 
-				if (param1.equalsIgnoreCase(F("low")))
+        if (param1.equalsIgnoreCase(F("0")))
+        {
+          PLUGIN_145_rf.sendCommand(IthoStandby);
+          addLog(LOG_LEVEL_INFO, F("Sent command for 'standby' to Itho unit"));
+          printWebString += F("Sent command for 'standby' to Itho unit");
+          PLUGIN_145_State=0;
+          PLUGIN_145_Timer=0;
+          success = true;
+        }
+        
+				if (param1.equalsIgnoreCase(F("1")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoLow);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'low speed' to Itho unit"));
@@ -173,7 +190,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}
 
-				if (param1.equalsIgnoreCase(F("medium")))
+				if (param1.equalsIgnoreCase(F("2")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoMedium);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'medium speed' to Itho unit"));
@@ -183,7 +200,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}
 
-				if (param1.equalsIgnoreCase(F("high")))
+				if (param1.equalsIgnoreCase(F("3")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoHigh);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'full speed' to Itho unit"));
@@ -192,8 +209,17 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
           PLUGIN_145_Timer=0;
 					success = true;
 				}
-
-				if (param1.equalsIgnoreCase(F("timer1")))
+       
+        if (param1.equalsIgnoreCase(F("4")))
+        {
+          PLUGIN_145_rf.sendCommand(IthoFull);
+          addLog(LOG_LEVEL_INFO, F("Sent command for 'full speed' to Itho unit"));
+          printWebString += F("Sent command for 'full speed' to Itho unit");
+          PLUGIN_145_State=4;
+          PLUGIN_145_Timer=0;
+          success = true;
+        }
+				if (param1.equalsIgnoreCase(F("10")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoTimer1);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'timer 1' to Itho unit"));
@@ -203,7 +229,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}				
 
-				if (param1.equalsIgnoreCase(F("timer2")))
+				if (param1.equalsIgnoreCase(F("20")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoTimer2);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'timer 2' to Itho unit"));
@@ -213,7 +239,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}		
 
-				if (param1.equalsIgnoreCase(F("timer3")))
+				if (param1.equalsIgnoreCase(F("30")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoTimer3);
 					addLog(LOG_LEVEL_INFO, F("Sent command for 'timer 3' to Itho unit"));
@@ -241,6 +267,11 @@ void PLUGIN_145_ITHOcheck()
    switch (cmd) {
         case IthoUnknown:
           log+=F("unknown\n");
+          break;
+        case IthoStandby:
+          log+=F("low\n");
+          PLUGIN_145_State=1;
+          PLUGIN_145_Timer=0;
           break;
         case IthoLow:
           log+=F("low\n");
@@ -288,6 +319,22 @@ void PLUGIN_145_ITHOcheck()
     }    
   }
   
+void PLUGIN_145_Publishdata(struct EventStruct *event){
+   // Publish data when last call is at least 1 sec ago
+   // This prevent high freq. changes to publish only at a rate of max 1 s
+   if ((millis()-PLUGIN_145_LastPublish)>999) 
+   {
+    UserVar[event->BaseVarIndex]=PLUGIN_145_State;
+    UserVar[event->BaseVarIndex+1]=PLUGIN_145_Timer;
+    PLUGIN_145_LastPublish=millis();
+    String log = F("State: ");
+    log += UserVar[event->BaseVarIndex];
+    addLog(LOG_LEVEL_INFO, log);
+    log = F("Timer: ");
+    log += UserVar[event->BaseVarIndex+1];
+    addLog(LOG_LEVEL_INFO, log);
+   } 
+}
 
   
 
