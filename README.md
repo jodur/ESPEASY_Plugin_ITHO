@@ -25,7 +25,7 @@ CC11xx pins    ESP pins Arduino pins  Description
   8 - CSN        15=D8    Pin 10        Chip select / (SPI_SS)
 
 Note: GDO2 is used as interrupt pin and is configurable in the plugin
-
+,
 Not recommended pins for intterupt:
 - Boot pins D3(GPIO0) and D4 (GPIO2) 
 - Pin with no interrupt support: D0 (GPIO16)
@@ -69,8 +69,8 @@ List of States:
 
 33 -Itho to high speed with hardware timer (30 min)
 
-In the plugin you are able to define 3 RF device ID's for the existing RF remote controls the plugin is listning to to update the state of the fan.
-You are able to capture the id of you RF remote, by setting the log settings to 3 in the advanced settings menu. After pressing a button, you will see the ID of the RF.
+In the plugin you are able to define 3 RF device ID's for the existing RF remote controls the plugin is listning to, to update the state of the fan.
+You are able to capture the id of you RF remote, by setting the log settings to 3, in the advanced settings menu. After pressing a button, you will see the ID of the RF.
 
 In case a timerfunction is called (timer 1..3), a internal timer is running as estimate for the elapsed time.
 
