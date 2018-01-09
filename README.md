@@ -6,26 +6,19 @@ made by 'supersjimmie' and 'klusjesman'
 
 For more info see also: https://gathering.tweakers.net/forum/list_messages/1690945 
 
-CC11xx pins    ESP pins Arduino pins  Description
+|CC11xx pin    |ESP pins|Description                                        |
+|:-------------|:-------|:--------------------------------------------------|
+|1 - VCC       |VCC     |3v3                                                |
+|2 - GND       |GND     |Ground                                             |
+|3 - MOSI      |13=D7   |Data input to CC11xx                               |  
+|4 - SCK       |14=D5   |Clock pin                                          |
+|5 - MISO/GDO1 |12=D6   |Data output from CC11xx / serial clock from CC11xx |
+|6 - GDO2      |04=D1*  |output as a symbol of receiving or sending data    |
+|7 - GDO0      |        |output as a symbol of receiving or sending data    |
+| 8 - CSN      |15=D8   |Chip select / (SPI_SS)                             |
 
-  1 - VCC        VCC      VCC           3v3
-  
-  2 - GND        GND      GND           Ground
-  
-  3 - MOSI       13=D7    Pin 11        Data input to CC11xx
-  
-  4 - SCK        14=D5    Pin 13        Clock pin
-  
-  5 - MISO/GDO1  12=D6    Pin 12        Data output from CC11xx / serial clock from CC11xx
-  
-  6 - GDO2       04=D1    Pin 2?        output as a symbol of receiving or sending data
-  
-  7 - GDO0       ?        Pin  ?        output as a symbol of receiving or sending data
-  
-  8 - CSN        15=D8    Pin 10        Chip select / (SPI_SS)
+*Note: GDO2 is used as interrupt pin for receiving and is configurable in the plugin
 
-Note: GDO2 is used as interrupt pin and is configurable in the plugin
-,
 Not recommended pins for intterupt:
 - Boot pins D3(GPIO0) and D4 (GPIO2) 
 - Pin with no interrupt support: D0 (GPIO16)
