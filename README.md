@@ -66,7 +66,7 @@ In the plugin you are able to define 3 RF device ID's for the existing RF remote
 You are able to capture the id of you RF remote, by setting the log settings to 3, in the advanced settings menu. After pressing a button, you will see the ID (23 chars) of the RF in the log. Use ID with '-'. 
 #### example ID: 11-22-33-44-55-66-77-88
 
-In case a timerfunction is called (timer 1..3), a internal timer is running as estimate for the elapsed time.
+In case a timerfunction is called (timer 1..3), an internal timer is running as estimate for the elapsed time.
 
 The plugin will publish MQTT topics as they change. The aquisition cycle time should be used as a state update cycle time.
 In case a topic doesnT change the cycle time is used for cyclic update. It is recommended to set this to higher values: for example to 60s
