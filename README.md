@@ -62,9 +62,13 @@ List of States:
 
 33 -Itho to high speed with hardware timer (30 min)
 
-In the plugin you are able to define 3 RF device ID's for the existing RF remote controls the plugin is listning to, to update the state of the fan.
+In the plugin you are able to define 3 RF device ID's for the existing RF remote controls the plugin is listening to, to update the state of the fan.
 You are able to capture the id of you RF remote, by setting the log settings to 3, in the advanced settings menu. After pressing a button, you will see the ID of the RF.
 
 In case a timerfunction is called (timer 1..3), a internal timer is running as estimate for the elapsed time.
 
+The plugin will publish MQTT topics as they change. The aquisition cycle time should be used as a state update cycle time.
+In case a topic doesnT change the cycle time is used for cyclic update. It is recommended to set this to higher values: for example to 60s
+
 For the lazy people or people with no codeskills a binary is added for ESPEASY with all stable plugins including this plugin
+
