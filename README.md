@@ -23,13 +23,13 @@ Not recommended pins for intterupt:
 - Boot pins D3(GPIO0) and D4 (GPIO2) 
 - Pin with no interrupt support: D0 (GPIO16)
 
-List of commands:
+## List of commands:
 
 1111 to join ESP8266 with Itho ventilation unit
 
 9999 to leaveESP8266 with Itho ventilation unit
 
-0 to set Itho ventilation unit to standby
+0 - set Itho ventilation unit to standby
 
 1 - set Itho ventilation unit to low speed
 
@@ -46,7 +46,7 @@ List of commands:
 33 - set itho to high speed with hardware timer (30 min)
 
 
-List of States:
+## List of States:
 
 1 - Itho ventilation unit to lowest speed
 
