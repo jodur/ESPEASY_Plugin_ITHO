@@ -2,6 +2,8 @@
 //############################## Plugin 145: Itho ventilation unit 868Mhz remote ########################
 //#######################################################################################################
 
+// author :jodur, 10-1-2018 
+
 // List of commands:
 // 1111 to join ESP8266 with Itho ventilation unit
 // 9999 to leaveESP8266 with Itho ventilation unit
@@ -121,7 +123,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 				addLog(LOG_LEVEL_DEBUG, F("IO-PIN changed, deatachinterrupt old pin"));
 				detachInterrupt(Plugin_145_IRQ_pin);
 			}
-			PLUGIN145_InitExtrasettings();
+			LoadCustomTaskSettings(event->TaskIndex, (byte*)&PLUGIN_145_ExtraSettings, sizeof(PLUGIN_145_ExtraSettings));
 			addLog(LOG_LEVEL_INFO, F("Extra Settings PLUGIN_145 loaded"));
 			PLUGIN_145_rf.init();
 			Plugin_145_IRQ_pin = Settings.TaskDevicePin1[event->TaskIndex];
@@ -175,13 +177,12 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
          break;
     }  
     
-		case PLUGIN_WRITE: {
+	case PLUGIN_WRITE: {
 
 		String tmpString = string;
 		String cmd = parseString(tmpString, 1);
 		String param1 = parseString(tmpString, 2);
-
-
+		
 			if (cmd.equalsIgnoreCase(F("STATE")))
 			{
 
@@ -201,14 +202,14 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}
 
-        if (param1.equalsIgnoreCase(F("0")))
-        {
-          PLUGIN_145_rf.sendCommand(IthoStandby);
-          addLog(LOG_LEVEL_INFO, F("Sent command for 'standby' to Itho unit"));
-          printWebString += F("Sent command for 'standby' to Itho unit");
-          PLUGIN_145_State=0;
-          PLUGIN_145_Timer=0;
-          success = true;
+			   if (param1.equalsIgnoreCase(F("0")))
+			    {
+					PLUGIN_145_rf.sendCommand(IthoStandby);
+					addLog(LOG_LEVEL_INFO, F("Sent command for 'standby' to Itho unit"));
+					printWebString += F("Sent command for 'standby' to Itho unit");
+					PLUGIN_145_State=0;
+					PLUGIN_145_Timer=0;
+					success = true;
         }
         
 				if (param1.equalsIgnoreCase(F("1")))
@@ -241,15 +242,15 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}
        
-        if (param1.equalsIgnoreCase(F("4")))
-        {
-          PLUGIN_145_rf.sendCommand(IthoFull);
-          addLog(LOG_LEVEL_INFO, F("Sent command for 'full speed' to Itho unit"));
-          printWebString += F("Sent command for 'full speed' to Itho unit");
-          PLUGIN_145_State=4;
-          PLUGIN_145_Timer=0;
-          success = true;
-        }
+				if (param1.equalsIgnoreCase(F("4")))
+				{
+				    PLUGIN_145_rf.sendCommand(IthoFull);
+					addLog(LOG_LEVEL_INFO, F("Sent command for 'full speed' to Itho unit"));
+					printWebString += F("Sent command for 'full speed' to Itho unit");
+					PLUGIN_145_State=4;
+					PLUGIN_145_Timer=0;
+					success = true;
+				}
 				if (param1.equalsIgnoreCase(F("13")))
 				{
 					PLUGIN_145_rf.sendCommand(IthoTimer1);
@@ -296,7 +297,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 		  strcpy(PLUGIN_145_ExtraSettings.ID1, WebServer.arg(F("PLUGIN_145_ID1")).c_str());
 		  strcpy(PLUGIN_145_ExtraSettings.ID2, WebServer.arg(F("PLUGIN_145_ID2")).c_str());
 		  strcpy(PLUGIN_145_ExtraSettings.ID3, WebServer.arg(F("PLUGIN_145_ID3")).c_str());
-		  PLUGIN145_SaveExtraSettings();
+		  SaveCustomTaskSettings(event->TaskIndex, (byte*)&PLUGIN_145_ExtraSettings, sizeof(PLUGIN_145_ExtraSettings));
           break;
         }	
 	}
@@ -386,7 +387,7 @@ void PLUGIN_145_ITHOcheck()
 void PLUGIN_145_Publishdata(struct EventStruct *event){
    // Publish data when last call is at least 1 sec ago
    // This prevent high freq. changes to publish only at a rate of max 1 s
-   if ((millis()-PLUGIN_145_LastPublish)>999) 
+   if ((millis()-PLUGIN_145_LastPublish)>900) 
    {
     UserVar[event->BaseVarIndex]=PLUGIN_145_State;
     UserVar[event->BaseVarIndex+1]=PLUGIN_145_Timer;
@@ -398,50 +399,6 @@ void PLUGIN_145_Publishdata(struct EventStruct *event){
     log += UserVar[event->BaseVarIndex+1];
     addLog(LOG_LEVEL_DEBUG, log);
    } 
-}
-
-/********************************************************************************************\
-Save settings specific pluging settings to to SPIFFS
-\*********************************************************************************************/
-String PLUGIN145_SaveExtraSettings(void)
-{
-	String err;
-	err = SaveToFile((char*)"PLUGIN145_Extrasettings.dat", 0, (byte*)&PLUGIN_145_ExtraSettings, sizeof(struct PLUGIN_145_ExtraSettingsStruct));
-	if (err.length())
-		return(err);
-}
-
-
-/********************************************************************************************\
-Load settings from SPIFFS
-\*********************************************************************************************/
-String PLUGIN145_LoadExtraSettings()
-{
-	String err;
-	err = LoadFromFile((char*)"PLUGIN145_Extrasettings.dat", 0, (byte*)&PLUGIN_145_ExtraSettings, sizeof(struct PLUGIN_145_ExtraSettingsStruct));
-	if (err.length())
-		return(err);
-}
-
-/********************************************************************************************\
-Init file for SPIFFS
-\*********************************************************************************************/
-
-int PLUGIN145_InitExtrasettings()
-{
-	fs::File f = SPIFFS.open("PLUGIN145_Extrasettings.dat", "r");
-	if (!f) // if file not exists then init file
-	{
-		String fname;
-		fname = F("PLUGIN145_Extrasettings.dat");
-		InitFile(fname.c_str(), 1024);
-		f.close();
-	}
-	else
-	{
-		f.close();
-		PLUGIN145_LoadExtraSettings();
-	}
 }
 
 bool PLUGIN_145_Valid_RFRemote(String rfremoteid)
