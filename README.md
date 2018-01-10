@@ -1,6 +1,8 @@
 # ESPEASY_Plugin_ITHO
 Plugin for ESPEasy regarding a ITHO Fan remote
 
+A CC1101 868Mhz transmitter is needed (available on ebay or aliexpress)
+
 This plugin is using the library from: https://github.com/supersjimmie/IthoEcoFanRFT/tree/master/Master/Itho 
 made by 'supersjimmie' and 'klusjesman'
 
@@ -73,3 +75,4 @@ In case a topic doesnT change the cycle time is used for cyclic update. It is re
 
 For the lazy people or people with no codeskills a binary is added for ESPEASY with all stable plugins including this plugin
 
+When using a Wemos D1 mini, you have to remove D1 and D2 from I2C on the hardware page, because one of the pins must be used as Intterupt pin. See note above concerning the interrupt pins.
