@@ -85,4 +85,4 @@ To control the fan, the ESP8266 has to be "paired" with the fan. To pair the ESP
 http://YourIP-adress/control?cmd=STATE,1111
 
 ### Connect/Join with MQTT-command form mosquito command line
-mosquitto_pub -t /ESP_Easy/Fan/state/cmd -m 'state 1111'
+mosquitto_pub -t /Fan/state/cmd -m 'state 1111'
