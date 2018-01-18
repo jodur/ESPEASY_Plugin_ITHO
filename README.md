@@ -81,8 +81,8 @@ When using a Wemos D1 mini, you have to remove D1 and D2 from I2C on the hardwar
 
 To control the fan, the ESP8266 has to be "paired" with the fan. To pair the ESP8266 with the remote you first have to powerdown (pull the plug) of the itho fan for minimal of 15 sec. After restoring the power you the are able to pair the ESP8266 within 2 min after restoring the power
 
-# Connect/Join with https-command:
+### Connect/Join with https-command:
 http://<ip-adress>/control?cmd=STATE,1111
 
-# Connect/Join with MQTT-command form mosquito command line
+### Connect/Join with MQTT-command form mosquito command line
 mosquitto_pub -t /ESP_Easy/Fan/state -m 1111
