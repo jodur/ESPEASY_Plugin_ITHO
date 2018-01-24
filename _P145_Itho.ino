@@ -33,10 +33,10 @@
 // http://ip/control?cmd=STATE,3
 
 // usage for example mosquito MQTT
-// mosquitto_pub -t /ESP_Easy/Fan/state -m 1111
-// mosquitto_pub -t /ESP_Easy/Fan/state -m 1
-// mosquitto_pub -t /ESP_Easy/Fan/state -m 2
-// mosquitto_pub -t /ESP_Easy/Fan/state -m 3
+// mosquitto_pub -t /Fan/cmd -m 'state 1111'
+// mosquitto_pub -t /Fan/cmd -m 'state 1'
+// mosquitto_pub -t /Fan/cmd -m 'state 2'
+// mosquitto_pub -t /Fan/cmd -m 'state 3'
 
 
 // This code needs the library made by 'supersjimmie': https://github.com/supersjimmie/IthoEcoFanRFT/tree/master/Master/Itho
@@ -152,6 +152,8 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 		addLog(LOG_LEVEL_INFO, F("EXIT PLUGIN_145"));
 		//remove interupt when plugin is removed
 		detachInterrupt(Plugin_145_IRQ_pin);
+		success = true;
+		break;
 	}
 
     case PLUGIN_ONCE_A_SECOND:
@@ -165,8 +167,8 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
          PLUGIN_145_Timer=0;
        } 
       
-      //Publish new data when vars are changed or init has runned
-      if  ((PLUGIN_145_OldState!=PLUGIN_145_State) || (PLUGIN_145_Timer>0) || (PLUGIN_145_OldLastIDindex!=PLUGIN_145_LastIDindex)|| PLUGIN_145_InitRunned)
+      //Publish new data when vars are changed or init has runned or timer is running (update every 2 sec)
+      if  ((PLUGIN_145_OldState!=PLUGIN_145_State) || ((PLUGIN_145_Timer>0) && (PLUGIN_145_Timer % 2==0)) || (PLUGIN_145_OldLastIDindex!=PLUGIN_145_LastIDindex)|| PLUGIN_145_InitRunned)
       {
 		addLog(LOG_LEVEL_DEBUG, F("UPDATE by PLUGIN_ONCE_A_SECOND"));
 		PLUGIN_145_Publishdata(event);
@@ -177,11 +179,11 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
       //Remeber current state for next cycle
       PLUGIN_145_OldState=PLUGIN_145_State;
 	  PLUGIN_145_OldLastIDindex =PLUGIN_145_LastIDindex;
+	  success = true;
       break;
     }
     
-
-
+	
     case PLUGIN_READ: {    
          
          // This ensures that even when Values are not changing, data is send at the configured interval for aquisition 
@@ -196,7 +198,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 		String tmpString = string;
 		String cmd = parseString(tmpString, 1);
 		String param1 = parseString(tmpString, 2);
-		
+		noInterrupts();
 			if (cmd.equalsIgnoreCase(F("STATE")))
 			{
 
@@ -303,6 +305,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 					success = true;
 				}	
 			} 
+			interrupts();
 	  break; }
 
       case PLUGIN_WEBFORM_LOAD:
@@ -321,6 +324,7 @@ boolean Plugin_145(byte function, struct EventStruct *event, String& string)
 		  strcpy(PLUGIN_145_ExtraSettings.ID2, WebServer.arg(F("PLUGIN_145_ID2")).c_str());
 		  strcpy(PLUGIN_145_ExtraSettings.ID3, WebServer.arg(F("PLUGIN_145_ID3")).c_str());
 		  SaveCustomTaskSettings(event->TaskIndex, (byte*)&PLUGIN_145_ExtraSettings, sizeof(PLUGIN_145_ExtraSettings));
+		  success = true;
           break;
         }	
 	}
@@ -334,8 +338,9 @@ void PLUGIN_145_ITHOinterrupt()
 }
 
 void PLUGIN_145_ITHOcheck()
-{	
-Serial.print("RF signal received\n");
+{
+	noInterrupts();
+	addLog(LOG_LEVEL_DEBUG, "RF signal received\n");
 	if (PLUGIN_145_rf.checkForNewPacket())
 	{
 		IthoCommand cmd = PLUGIN_145_rf.getLastCommand();
@@ -416,6 +421,7 @@ Serial.print("RF signal received\n");
 				addLog(LOG_LEVEL_DEBUG, log);
 			 }
 	}
+interrupts();
 }
   
 void PLUGIN_145_Publishdata(struct EventStruct *event)
@@ -440,5 +446,5 @@ int PLUGIN_145_RFRemoteIndex(String rfremoteid)
 	if (rfremoteid == PLUGIN_145_ExtraSettings.ID1) return 1;
 		else if (rfremoteid == PLUGIN_145_ExtraSettings.ID2) return 2;
 			else if (rfremoteid == PLUGIN_145_ExtraSettings.ID2) return 3;
-				else return 0;
+				else return -1;
 }
