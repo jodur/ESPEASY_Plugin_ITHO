@@ -49,9 +49,6 @@ IthoCC1101::IthoCC1101(uint8_t counter, uint8_t sendTries) : CC1101()
 	this->outIthoPacket.deviceId2[5] = 105;
 	this->outIthoPacket.deviceId2[6] = 154;
 	this->outIthoPacket.deviceId2[7] = 86;
-	
-	
-	
 } //IthoCC1101
 
 // default destructor
@@ -289,13 +286,13 @@ void IthoCC1101::initReceive()
 	writeRegister(CC1101_IOCFG2 ,0x00);			//Assert when RX FIFO is filled or above the RX FIFO threshold. Deassert when (0x00): RX FIFO is drained below threshold, or (0x01): deassert when RX FIFO is empty.
 	writeRegister(CC1101_FSCTRL1 ,0x06);
 	writeRegister(CC1101_FSCTRL0 ,0x00);
-	writeRegister(CC1101_MDMCFG4 ,0x5A);
-	writeRegister(CC1101_MDMCFG3 ,0x83);
+	writeRegister(CC1101_MDMCFG4 ,0xE8);
+	writeRegister(CC1101_MDMCFG3 ,0x43);
 	writeRegister(CC1101_MDMCFG2 ,0x00);		//Enable digital DC blocking filter before demodulator, 2-FSK, Disable Manchester encoding/decoding, No preamble/sync 
 	writeRegister(CC1101_MDMCFG1 ,0x22);		//Disable FEC
 	writeRegister(CC1101_MDMCFG0 ,0xF8);
 	writeRegister(CC1101_CHANNR ,0x00);
-	writeRegister(CC1101_DEVIATN ,0x50);
+	writeRegister(CC1101_DEVIATN ,0x40);
 	writeRegister(CC1101_FREND1 ,0x56);
 	writeRegister(CC1101_FREND0 ,0x17);
 	writeRegister(CC1101_MCSM0 ,0x18);			//no auto calibrate
@@ -307,7 +304,7 @@ void IthoCC1101::initReceive()
 	writeRegister(CC1101_FSCAL3 ,0xA9);
 	writeRegister(CC1101_FSCAL2 ,0x2A);
 	writeRegister(CC1101_FSCAL1 ,0x00);
-	writeRegister(CC1101_FSCAL0 ,0x11);
+	writeRegister(CC1101_FSCAL0 ,0x1F);
 	writeRegister(CC1101_FSTEST ,0x59);
 	writeRegister(CC1101_TEST2 ,0x81);
 	writeRegister(CC1101_TEST1 ,0x35);
@@ -317,7 +314,6 @@ void IthoCC1101::initReceive()
 	writeRegister(CC1101_ADDR ,0x00);
 	writeRegister(CC1101_PKTLEN ,0xFF);
 	writeRegister(CC1101_TEST0 ,0x09);
-	writeRegister(CC1101_FSCAL2 ,0x00);
 
 	writeCommand(CC1101_SCAL);
 
@@ -348,7 +344,7 @@ void  IthoCC1101::initReceiveMessage2(IthoMessageType expectedMessageType)
 	writeCommand(CC1101_SIDLE);	//idle
 	
 	//set datarate	
-	writeRegister(CC1101_MDMCFG4 ,0x5A); // set kBaud
+	writeRegister(CC1101_MDMCFG4 ,0x9A); // set kBaud
 	writeRegister(CC1101_MDMCFG3 ,0x83); // set kBaud
 	writeRegister(CC1101_DEVIATN ,0x50);
 	
@@ -986,12 +982,22 @@ bool IthoCC1101::checkID(const uint8_t *id)
 	return true;
 }
 
-String IthoCC1101::getLastIDstr() {
+String IthoCC1101::getLastIDstr(bool ashex) {
 	String str;
 	for (uint8_t i=0; i<8;i++) {
-		str += String(inIthoPacket.deviceId2[i], HEX);
-		if (i<7) str += "-";
+		if (ashex) str += String(inIthoPacket.deviceId2[i], HEX);
+		else str += String(inIthoPacket.deviceId2[i]);
+		if (i<7) str += ":";
 	}
 	return str;
 }
 
+String IthoCC1101::getLastMessage2str(bool ashex) {
+    String str = "Length="+ String(inMessage2.length) + ".";
+    for (uint8_t i=0; i<inMessage2.length;i++) {
+        if (ashex) str += String(inMessage2.data[i], HEX);
+        else str += String(inMessage2.data[i]);
+		if (i<inMessage2.length-1) str += ":";
+    }
+    return str;
+}
