@@ -76,3 +76,13 @@ In case a topic doesnT change the cycle time is used for cyclic update. It is re
 For the lazy people or people with no codeskills a binary is added for ESPEASY with all stable plugins including this plugin
 
 When using a Wemos D1 mini, you have to remove D1 and D2 from I2C on the hardware page, because one of the pins must be used as Intterupt pin. See note above concerning the interrupt pins.
+
+### Paring the ESP8266 remote with the fan
+
+To control the fan, the ESP8266 has to be "paired" with the fan. To pair the ESP8266 with the remote you first have to powerdown (pull the plug) of the itho fan for minimal of 15 sec. After restoring the power you the are able to pair the ESP8266 within 2 min after restoring the power
+
+### Connect/Join with https-command:
+http://YourIP-adress/control?cmd=STATE,1111
+
+### Connect/Join with MQTT-command form mosquito command line
+mosquitto_pub -t /Fan/state/cmd -m 'state 1111'
