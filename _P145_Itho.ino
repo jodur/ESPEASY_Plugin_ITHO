@@ -445,6 +445,6 @@ int PLUGIN_145_RFRemoteIndex(String rfremoteid)
 {
 	if (rfremoteid == PLUGIN_145_ExtraSettings.ID1) return 1;
 		else if (rfremoteid == PLUGIN_145_ExtraSettings.ID2) return 2;
-			else if (rfremoteid == PLUGIN_145_ExtraSettings.ID2) return 3;
+			else if (rfremoteid == PLUGIN_145_ExtraSettings.ID3) return 3;
 				else return -1;
 }
