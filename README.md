@@ -79,7 +79,7 @@ When using a Wemos D1 mini, you have to remove D1 and D2 from I2C on the hardwar
 
 ### Paring the ESP8266 remote with the fan
 
-To control the fan, the ESP8266 has to be "paired" with the fan. To pair the ESP8266 with the remote you first have to powerdown (pull the plug) of the itho fan for minimal of 15 sec. After restoring the power you the are able to pair the ESP8266 within 2 min after restoring the power
+To control the fan, the ESP8266 has to be "paired" with the fan. To pair the ESP8266 with the fan, you first have to powerdown (pull the plug) of the itho fan for minimal of 15 sec. After restoring the power you the are able to pair the ESP8266 within 2 min after restoring the power
 
 ### Connect/Join with https-command:
 http://YourIP-adress/control?cmd=STATE,1111
